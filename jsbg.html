@@ -36,6 +36,9 @@ canvas {
     z-index: -20;
 }
 
+button:hover {
+    background-color: rgba(209, 224, 230, 0.925);
+}
 #bg_div {
     width: 100%;
     height: 100%;
@@ -551,10 +554,12 @@ html {
 
 
 </style>
+
+
 <body>
 
 
-    <main class="main-content-diff mc-home">
+    <main class="main-content-diff mc-home" style="display: none;">
         <div class="menu-section" id="menu-section">
             <a href="/openweather/" class="menupar par1" id="par1">
                 <div class="menupar-child mc1">
@@ -641,48 +646,48 @@ html {
             </a>
         </div>
     </main>
-    <!-- background -->
     <div id="bg_div"></div>
     <canvas id="canvas"></canvas>
+    <canvas id="canvas2"></canvas>
+
 </body>
 
 <script>
+    
 
-let canvas, ctx
+let canvas1 = document.getElementById("canvas"), ctx = canvas1.getContext("2d")
 var intver
 let sidelen = 50
 let arr1 = [] 
 
-function init() {
-    canvas = document.querySelector("#canvas")
-    ctx = canvas.getContext("2d")
 
-    let w, h
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+
+function init() {
+    canvas1 = document.getElementById("canvas")
+    ctx = canvas1.getContext("2d")
+    canvas1.width = window.innerWidth
+    canvas1.height = window.innerHeight
 
     reSize()
     
+        
 }
 
 function reSize() {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    canvas1.width = window.innerWidth
+    canvas1.height = window.innerHeight
 
-    draw(canvas.width, canvas.height)
+    draw(canvas1.width,canvas1.height)
 }
 
-
-function drawHexagon(string, x, y, size, color) {
-    const canvas = document.getElementById("canvas")
-    let ctx = canvas.getContext(string)
+function drawHexagon(x, y, size, color) {
     let side = 0
     ctx.beginPath()
     ctx.moveTo(x + size * Math.cos(0),y + size * Math.sin(0))
     for (side; side<7;side++) {
         ctx.lineTo(x + size * Math.cos(side * 2 * Math.PI/6),y + size * Math.sin(side * 2 * Math.PI / 6))
     }
-    ctx.lineWidth = "5"
+    ctx.lineWidth = "3"
     ctx.strokeStyle = color
     ctx.stroke()
 }
@@ -691,11 +696,11 @@ function drawHexagon(string, x, y, size, color) {
 
 
 function draw(width, height) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.clearRect(0, 0, canvas1.width, canvas1.height)
     for (let i = 0; i<width+100;i+=150) {
         for (let j = 0; j<height+100;j+=43) {
-            drawHexagon("2d", i, j*2, sidelen, randomColour())
-            drawHexagon("2d", i+75, j*2+43, sidelen, randomColour())
+            drawHexagon(i, j*2, sidelen, randomColour())
+            drawHexagon(i+75, j*2+43, sidelen, randomColour())
             
             arr1.push([i,  j*2])
             arr1.push([i+75, j*2+44])
@@ -723,31 +728,33 @@ function randomColour2() {
 function mouseMove(e) {
     let x = e.clientX
     let y = e.clientY
-    
+
     for (let i = 0; i< arr1.length; i++) {
         redrawHexagon(x,y,arr1[i])
     }
+
 }
+
 
 function redrawHexagon(x,y,arr) {
     let arr_x = arr[0]
     let arr_y = arr[1]
 
     function intervalFunc() {
-        drawHexagon("2d", arr_x, arr_y, sidelen, randomColour())
+        drawHexagon(arr_x, arr_y, sidelen, randomColour())
     }
-
-    if ((inRangeValue(x,arr_x) && inRangeValue(y,arr_y) == true)) {
-        drawHexagon("2d", arr_x, arr_y, sidelen, randomColour2())
-        
-        intver = setTimeout(intervalFunc, 2000)
-    }
+    let rangeBool = (inRangeValue(x,arr_x) && inRangeValue(y,arr_y))
+    
+    if (rangeBool) {
+        drawHexagon(arr_x, arr_y, sidelen, randomColour2()) 
+        intver = setTimeout(intervalFunc, 1000)
+    } 
 }
 
 
 
+
 function inRangeValue(coord, arrval) {
-    // mouse X bubble
     let offset = 40
     if (arrval+offset > coord && arrval-offset < coord) {
         return true
@@ -764,18 +771,6 @@ function mathRnd(min, max) {
 window.addEventListener("DOMContentLoaded", init)
 window.addEventListener("resize", reSize)
 window.addEventListener("mousemove", mouseMove)
-
-
-
-// ease back/fade color of redrawn hexagons
-//      use interval to turn back to orignal color
-//      set original color per page reload
-
-
-// what is possible to do with canvas:
-//      animation to change color of hexagons
-//      use screen width % to find center point and make gradient
-
 
 
 function fixedMenu() {
@@ -850,6 +845,18 @@ function runLoop() {
 }
 
 runLoop()
+
+
+// running over hex redraws multiple times and not once 
+    
+    
+    // google other background effects for ideas about hovering over elements
+
+
+    // randomly choose from coordinates to recolour a hexagon
+    
+    // gradient animation
+    //      find width and height center and adjust hexagon colors from middle to off screen
 
 </script>
 </html>
