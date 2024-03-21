@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="b.js"></script>
 </head>
 <style>
 
@@ -39,14 +38,6 @@ canvas {
 button:hover {
     background-color: rgba(209, 224, 230, 0.925);
 }
-#bg_div {
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(#f7f7f707 25%, #000000c2 75%);
-    z-index: -19;
-    position: absolute;
-}
-
 
 :root {
     --rotate-value: 240s; /* 240s */
@@ -555,10 +546,7 @@ html {
 
 </style>
 
-
 <body>
-
-
     <main class="main-content-diff mc-home" style="display: none;">
         <div class="menu-section" id="menu-section">
             <a href="/openweather/" class="menupar par1" id="par1">
@@ -646,217 +634,123 @@ html {
             </a>
         </div>
     </main>
-    <div id="bg_div"></div>
-    <canvas id="canvas"></canvas>
-    <canvas id="canvas2"></canvas>
 
 </body>
-
 <script>
-    
 
-let canvas1 = document.getElementById("canvas"), ctx = canvas1.getContext("2d")
-var intver
-let sidelen = 50
-let arr1 = [] 
+window.addEventListener("DOMContentLoaded", () => {
+    let canvas, ctx;
+    let sidelen = 50;
+    let arr1 = [];
+    let arr2 = [];
+    let colorChanged;
+    let intver;
 
+    function init() {
+        canvas = document.createElement("canvas");
+        canvas.setAttribute("id", "canvas");
+        document.body.appendChild(canvas);
 
+        ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-function init() {
-    canvas1 = document.getElementById("canvas")
-    ctx = canvas1.getContext("2d")
-    canvas1.width = window.innerWidth
-    canvas1.height = window.innerHeight
+        colorChanged = Array(arr1.length + arr2.length).fill(false);
 
-    reSize()
-    
-        
-}
-
-function reSize() {
-    canvas1.width = window.innerWidth
-    canvas1.height = window.innerHeight
-
-    draw(canvas1.width,canvas1.height)
-}
-
-function drawHexagon(x, y, size, color) {
-    let side = 0
-    ctx.beginPath()
-    ctx.moveTo(x + size * Math.cos(0),y + size * Math.sin(0))
-    for (side; side<7;side++) {
-        ctx.lineTo(x + size * Math.cos(side * 2 * Math.PI/6),y + size * Math.sin(side * 2 * Math.PI / 6))
+        reSize();
     }
-    ctx.lineWidth = "3"
-    ctx.strokeStyle = color
-    ctx.stroke()
-}
 
+    function reSize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
+        draw(canvas.width, canvas.height);
+    }
 
+    function drawHexagon(x, y, size, color) {
+        ctx.beginPath();
+        ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+        for (let side = 1; side < 7; side++) {
+            ctx.lineTo(x + size * Math.cos(side * 2 * Math.PI / 6), y + size * Math.sin(side * 2 * Math.PI / 6));
+        }
+        ctx.closePath();
+        ctx.lineWidth = "3";
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    }
 
-function draw(width, height) {
-    ctx.clearRect(0, 0, canvas1.width, canvas1.height)
-    for (let i = 0; i<width+100;i+=150) {
-        for (let j = 0; j<height+100;j+=43) {
-            drawHexagon(i, j*2, sidelen, randomColour())
-            drawHexagon(i+75, j*2+43, sidelen, randomColour())
-            
-            arr1.push([i,  j*2])
-            arr1.push([i+75, j*2+44])
+    function draw(width, height) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < width + 100; i += 150) {
+            for (let j = 0; j < height + 100; j += 43) {
+                drawHexagon(i, j * 2, sidelen, randomColour());
+                drawHexagon(i + 75, j * 2 + 43, sidelen, randomColour());
+                arr1.push([i, j * 2]);
+                arr2.push([i + 75, j * 2 + 44]);
+            }
         }
     }
-}
 
-
-function randomColour() {
-    let r = mathRnd(150,250)
-    let g = 150
-    let col = `rgb(${r}, ${g},0,1)`
-    return col 
-}
-
-function randomColour2() {
-    let r = mathRnd(0,255)
-    let g = mathRnd(0,255)
-    let b = mathRnd(0,255)
-    let col = `rgb(${r}, ${g},${b},1)`
-    return col 
-}
-
-
-function mouseMove(e) {
-    let x = e.clientX
-    let y = e.clientY
-
-    for (let i = 0; i< arr1.length; i++) {
-        redrawHexagon(x,y,arr1[i])
+    function randomColour() {
+        let r = mathRnd(150, 250);
+        let g = 150;
+        let col = `rgb(${r}, ${g},0,0.7)`;
+        return col;
     }
 
-}
-
-
-function redrawHexagon(x,y,arr) {
-    let arr_x = arr[0]
-    let arr_y = arr[1]
-
-    function intervalFunc() {
-        drawHexagon(arr_x, arr_y, sidelen, randomColour())
+    function randomColour2() {
+        let r = mathRnd(0, 255);
+        let g = mathRnd(0, 255);
+        let b = mathRnd(0, 255);
+        let col = `rgb(${r}, ${g},${b},1)`;
+        return col;
     }
-    let rangeBool = (inRangeValue(x,arr_x) && inRangeValue(y,arr_y))
-    
-    if (rangeBool) {
-        drawHexagon(arr_x, arr_y, sidelen, randomColour2()) 
-        intver = setTimeout(intervalFunc, 1000)
-    } 
-}
 
+    function mouseMove(e) {
+        let x = e.clientX;
+        let y = e.clientY;
 
+        for (let i = 0; i < arr1.length; i++) {
+            checkAndChangeColor(x, y, arr1[i], i);
+        }
 
-
-function inRangeValue(coord, arrval) {
-    let offset = 40
-    if (arrval+offset > coord && arrval-offset < coord) {
-        return true
-    } else {
-        return false
+        for (let i = 0; i < arr2.length; i++) {
+            checkAndChangeColor(x, y, arr2[i], arr1.length + i);
+        }
     }
-}
 
-function mathRnd(min, max) {
-    let s = Math.floor(Math.random() * (max-min) +  min)
-    return s
-}
+    function checkAndChangeColor(x, y, arr, index) {
+        let arr_x = arr[0];
+        let arr_y = arr[1];
 
-window.addEventListener("DOMContentLoaded", init)
-window.addEventListener("resize", reSize)
-window.addEventListener("mousemove", mouseMove)
+        let rangeBool = inRangeValue(x, arr_x) && inRangeValue(y, arr_y);
 
+        function intervalFunc() {
+            drawHexagon(arr_x, arr_y, sidelen, randomColour())
+        }
 
-function fixedMenu() {
-    const par0 = document.getElementById("par2")
-    const par1 = document.getElementById("par3")
-    const par2 = document.getElementById("par4")
-    const par3 = document.getElementById("par5")
-    const par4 = document.getElementById("par6")
-    const par5 = document.getElementById("par7")
-
-    const parentArr = [par0,par1,par2,par3,par4,par5]
-    const parS = [{
-        top: "320px",
-        left: "10px",
-    },
-    {
-        top: "320px",
-        left: "600px",
-    },
-    {
-        top: "69px",
-        left: "157px",
-    },
-    {
-        top: "69px",
-        left: "452px"
-    },  
-    {
-        top: "571px",
-        left: "452px",
-    }, 
-    {
-        top: "571px",
-        left: "157px",
-    }]
-
-    const rotateMenu = document.getElementById("menu-section")
-    rotateMenu.style.width = "950px"
-    rotateMenu.style.height = "950px"
-    rotateMenu.classList.add("menu-rotate")
-
-    for (let i = 0; i<parS.length; i++) {
-        parentArr[i].style.top = parS[i].top
-        parentArr[i].style.left = parS[i].left
-        parentArr[i].style.visibility = "visible"
+        if (rangeBool && !colorChanged[index]) {
+            drawHexagon(arr_x, arr_y, sidelen, randomColour2());
+            colorChanged[index] = true;
+        } else if (!rangeBool && colorChanged[index]) {
+            intver = setInterval(intervalFunc, 1000)
+            colorChanged[index] = false;
+        }
+        
     }
-}
 
-function forcedPositionAfterAnimation() {
-    const menushrink = getComputedStyle(document.documentElement).getPropertyValue("--menushrink") 
-    let timer = parseFloat(removeMS(menushrink))
-
-    setTimeout(() => {
-        fixedMenu()
-    }, timer);
-
-}
-
-
-function removeMS(string) {
-    const ns = string
-    if(ns.includes("ms")) { 
-        let newString = ns.slice(0,-2)
-        return newString
+    function inRangeValue(coord, arrval) {
+        let offset = 40;
+        return arrval + offset > coord && arrval - offset < coord;
     }
-}
 
+    function mathRnd(min, max) {
+        return Math.floor(Math.random() * (max - min) + min);
+    }
 
-function runLoop() {
-    forcedPositionAfterAnimation()    
-
-}
-
-runLoop()
-
-
-// running over hex redraws multiple times and not once 
-    
-    
-    // google other background effects for ideas about hovering over elements
-
-
-    // randomly choose from coordinates to recolour a hexagon
-    
-    // gradient animation
-    //      find width and height center and adjust hexagon colors from middle to off screen
-
+    window.addEventListener("resize", reSize);
+    window.addEventListener("mousemove", mouseMove);
+    init();
+});
 </script>
 </html>
